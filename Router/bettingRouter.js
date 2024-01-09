@@ -10,48 +10,29 @@ router.get("/betting/logs", async (req, res) => {
     try {
         const selectedFields = ['id', 'user_id', 'game_type', 'game_id', 'game_session', 'bet_ref_id', 'bet_data', 'amount', 'created_date', 'updated_date', 'jackpot_contribution'];
 
-        const today = moment().startOf('day');
-        const yesterday = moment().subtract(1, 'days').startOf('day');
-        const lastWeek = moment().subtract(7, 'days').startOf('day');
-        const startOfMonth = moment().startOf('month');
-        const endOfMonth = moment().endOf('month');
+        const dateFilter = req.query.dateFilter; // Get the date filter from the query parameter
+        const dateEnd = req.query.dateEnd; // Get the end date filter from the query parameter
 
-        const dateFilter = req.query.dateFilter || 'today';
+        let startDate, endDate;
 
-        let dateCondition = {};
-
-        switch (dateFilter) {
-            case 'today':
-                dateCondition = {
-                    created_date: {
-                        [Op.gte]: today.toDate(),
-                    }
-                };
-                break;
-            case 'yesterday':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [yesterday.toDate(), today.toDate()],
-                    }
-                };
-                break;
-            case 'last week':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [lastWeek.toDate(), today.toDate()],
-                    }
-                };
-                break;
-            case 'this month':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [startOfMonth.toDate(), endOfMonth.toDate()],
-                    }
-                };
-                break;
-            default:
-                break;
+        if (dateFilter) {
+            startDate = moment(dateFilter).startOf('day');
+        } else {
+            startDate = moment().startOf('day'); // Default to today if dateFilter is not provided
         }
+
+        if (dateEnd) {
+            endDate = moment(dateEnd).endOf('day');
+        } else {
+            endDate = moment().endOf('day'); // Default to today's end of day if dateEnd is not provided
+        }
+
+        const dateCondition = {
+            created_date: {
+                [Op.gte]: startDate.toDate(),
+                [Op.lt]: endDate.toDate(),
+            }
+        };
 
         const allBets = await Betting.findAll({
             where: dateCondition,
@@ -64,7 +45,6 @@ router.get("/betting/logs", async (req, res) => {
                 ...bet.dataValues,
                 created_date: moment.utc(bet.created_date).tz('Asia/Manila').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss'),
                 updated_date: moment.utc(bet.updated_date).tz('Asia/Manila').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss')
-
             };
         });
 
@@ -75,17 +55,11 @@ router.get("/betting/logs", async (req, res) => {
         });
 
         adjustedBets.forEach((bet) => {
-            const matchedResult = resultBet.find((result) => {
-                return result.bet_id === bet.id;
-            });
+            const matchedResult = resultBet.find((result) => result.bet_id === bet.id);
 
             if (matchedResult) {
                 bet.winning_amount = matchedResult.amount_won;
-                if (matchedResult.result === 'JACKPOT') {
-                    bet.jackpot_payout = matchedResult.amount_won;
-                } else {
-                    bet.jackpot_payout = 0;
-                }
+                bet.jackpot_payout = matchedResult.result === 'JACKPOT' ? matchedResult.amount_won : 0;
             } else {
                 bet.winning_amount = 0;
                 bet.jackpot_payout = 0;
@@ -94,10 +68,10 @@ router.get("/betting/logs", async (req, res) => {
 
         res.status(200).json({ Betting_Logs: adjustedBets });
     } catch (error) {
-        console.error(error)
-        res.status(500).json({ message: error.message })
+        console.error(error);
+        res.status(500).json({ message: error.message });
     }
-})
+});
 
 router.get("/ggr/dashboard", async (req, res) => {
     try {
@@ -167,66 +141,47 @@ router.get("/ggr/dashboard", async (req, res) => {
     }
 });
 
-router.get("/gameplay/history", async (req,res) =>{
+router.get("/gameplay/history", async (req, res) => {
     try {
+        const selectedFields = ['id', 'username', 'game', 'credit_before', 'cards', 'bet', 'winning_cards_identification', 'ball_list', 'extraball_cost', 'side_bet', 'win', 'win_spent', 'first_bonus_feature_win', 'second_bonus_feature_win', 'jackpot_win', 'credit_after', 'game_start', 'game_end', 'platform_name'];
 
-        const today = moment().startOf('day');
-        const yesterday = moment().subtract(1, 'days').startOf('day');
-        const lastWeek = moment().subtract(7, 'days').startOf('day');
-        const startOfMonth = moment().startOf('month');
-        const endOfMonth = moment().endOf('month');
+        const dateFilter = req.query.dateFilter; // Get the date filter from the query parameter
+        const dateEnd = req.query.dateEnd; // Get the end date filter from the query parameter
 
-        const dateFilter = req.query.dateFilter || 'today';
+        let startDate, endDate;
 
-        let dateCondition = {};
-
-        switch (dateFilter) {
-            case 'today':
-                dateCondition = {
-                    created_date: {
-                        [Op.gte]: today.toDate(),
-                    }
-                };
-                break;
-            case 'yesterday':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [yesterday.toDate(), today.toDate()],
-                    }
-                };
-                break;
-            case 'last week':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [lastWeek.toDate(), today.toDate()],
-                    }
-                };
-                break;
-            case 'this month':
-                dateCondition = {
-                    created_date: {
-                        [Op.between]: [startOfMonth.toDate(), endOfMonth.toDate()],
-                    }
-                };
-                break;
-            default:
-                break;
+        if (dateFilter) {
+            startDate = moment(dateFilter).startOf('day');
+        } else {
+            startDate = moment().startOf('day'); 
         }
 
-        const selectedFields = ['id', 'username', 'game', 'credit_before', 'cards', 'bet', 'winning_cards_identification', 'ball_list', 'extraball_cost', 'side_bet', 'win', 'win_spent', 'first_bonus_feature_win', 'second_bonus_feature_win', 'jackpot_win', 'credit_after', 'game_start', 'game_end', 'platform_name'];
+        if (dateEnd) {
+            endDate = moment(dateEnd).endOf('day');
+        } else {
+            endDate = moment().endOf('day'); 
+        }
+
+        const dateCondition = {
+            created_date: {
+                [Op.gte]: startDate.toDate(),
+                [Op.lt]: endDate.toDate(),
+            }
+        };
+
         const GamePlayHistories = await GamePlayHistory.findAll({
-            attributes:selectedFields,
+            attributes: selectedFields,
             where: dateCondition,
             order: [['id', 'DESC']],
-        }) 
+        });
 
-        res.status(200).json({ GamePlayHistories })
-        
+        res.status(200).json({ GamePlayHistories });
+
     } catch (error) {
-        console.error(error)
+        console.error(error);
         res.status(500).json({ message: error.message });
     }
-})
+});
 
 
 module.exports = router

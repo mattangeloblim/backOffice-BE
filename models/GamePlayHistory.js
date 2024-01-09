@@ -40,6 +40,6 @@ const GamePlayHistory = sequelize.define('GamePlayHistory', {
     timestamps: false,
 });
 
-GamePlayHistory.sync()
+// GamePlayHistory.sync()
 
 module.exports = GamePlayHistory;
