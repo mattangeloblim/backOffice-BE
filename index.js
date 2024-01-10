@@ -5,8 +5,14 @@ const cors = require("cors");
 const port = process.env.PORT
 const app = express();
 const fs = require("fs")
-const file = fs.readFileSync("./1CE3B0CF64F9D3933B92279E7A3F1CE2.txt")
+const key = fs.readFileSync("private.key")
+const cert = fs.readFileSync("certificate.crt")
 const https = require("https")
+
+const cred = {
+    key, 
+    cert
+}
 
 app.use(cors());
 app.use(express.json()); 
@@ -16,11 +22,11 @@ const BettingRoutes = require("./Router/bettingRouter")
 
 app.use("/api", BettingRoutes)
 
-app.get("/.well-known/pki-validation/1CE3B0CF64F9D3933B92279E7A3F1CE2.txt", (req,res) =>{
-    res.sendFile("/home/ubuntu/backOffice-BE/1CE3B0CF64F9D3933B92279E7A3F1CE2.txt")
-})
+
 
 app.listen(port, () =>{
     console.log(`App is listen on Port ${port}`)
 })
 
+const httpsServer = https.createServer(cred,app)
+httpsServer.listen(process.env.HTTPSPORT)
