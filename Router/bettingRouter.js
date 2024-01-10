@@ -136,7 +136,7 @@ router.get("/ggr/dashboard", async (req, res) => {
 
         res.status(200).json(response);
     } catch (error) {
-        console.error(error);
+        console.error(error);   
         res.status(500).json({ message: error.message });
     }
 });
@@ -176,7 +176,6 @@ router.get("/gameplay/history", async (req, res) => {
         });
 
         res.status(200).json({ GamePlayHistories });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });

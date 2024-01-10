@@ -58,6 +58,6 @@ const betting = sequelize.define("betting", {
   timestamps: false, 
 });
 
-// betting.sync()
+
 
 module.exports = betting;
