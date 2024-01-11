@@ -22,8 +22,6 @@ const BettingRoutes = require("./Router/bettingRouter")
 
 app.use("/api", BettingRoutes)
 
-
-
 app.listen(port, () =>{
     console.log(`App is listen on Port ${port}`)
 })
