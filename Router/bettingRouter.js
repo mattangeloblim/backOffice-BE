@@ -115,6 +115,7 @@ router.get("/ggr/dashboard", async (req, res) => {
                 .reduce((total, record) => total + parseFloat(record.jackpot_contribution || 0), 0);
 
             const totalPayout = betResults
+                .filter(record => record.result === 'WIN')
                 .reduce((total, record) => total + parseFloat(record.amount_won || 0), 0);
 
                 const totalJackpotPayout = betResults
