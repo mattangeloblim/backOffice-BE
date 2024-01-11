@@ -126,7 +126,7 @@ router.get("/ggr/dashboard", async (req, res) => {
                 date: startDate.format('YYYY-MM-DD'),
                 amount: totalAmount,
                 payout: totalPayout,
-                ggr: totalAmount - totalPayout,
+                ggr: totalAmount - totalPayout - totalJackpotPayout,
                 jackpot_contribution: totalJackpotContribution,
                 jackpotPayout: totalJackpotPayout,
             });
