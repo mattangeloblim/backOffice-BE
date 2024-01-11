@@ -97,16 +97,32 @@ router.get("/ggr/dashboard", async (req, res) => {
             };
 
             const betRecords = await Betting.findAll({
-                attributes: ['amount', 'jackpot_contribution'],
+                attributes: ['id', 'amount', 'jackpot_contribution', 'game_type'],
                 where: dateCondition,
                 raw: true
             });
-            
+
             const betResults = await BettingResult.findAll({
-                attributes:['amount_won', 'result'],
+                attributes: ['amount_won', 'result', 'bet_id'],
                 where: dateCondition,
                 raw: true
             })
+
+            const excludedGameTypes = ['13 BALL BINGO WEB', 'BINGO PARES WEB', 'DRAGON VS TIGER BINGO WEB', 'BINGO SWERTRES WEB'];
+
+            const excludedGameTypesClassic = ['FORTUNE 30 WEB', 'GOLD FARM WEB', 'GOLDEN ERA WEB', 'PIRATE BABES WEB', 'SEA RICHES WEB', 'BINGO PERYAHAN WEB'];
+
+            // Filter betRecords based on excludedGameTypes
+            const filteredBetRecords = betResults.filter(result => {
+                const matchingResult = betRecords.find(record => record.id === result.bet_id);
+                return matchingResult && !excludedGameTypes.includes(matchingResult.game_type) && result.result === 'JACKPOT';
+            });
+
+            // Filter betRecords based on filteredBetRecordsClassic
+            const filteredBetRecordsVariants = betResults.filter(result => {
+                const matchingResult = betRecords.find(record => record.id === result.bet_id);
+                return matchingResult && !excludedGameTypesClassic.includes(matchingResult.game_type) && result.result === 'JACKPOT';
+            });
 
             const totalAmount = betRecords
                 .reduce((total, record) => total + parseFloat(record.amount || 0), 0);
@@ -118,17 +134,20 @@ router.get("/ggr/dashboard", async (req, res) => {
                 .filter(record => record.result === 'WIN')
                 .reduce((total, record) => total + parseFloat(record.amount_won || 0), 0);
 
-                const totalJackpotPayout = betResults
-                .filter(record => record.result === 'JACKPOT')
+            const totalJackpotPayoutClassic = filteredBetRecords
+                .reduce((total, record) => total + parseFloat(record.amount_won || 0), 0);
+
+            const totalJackpotPayoutVariant = filteredBetRecordsVariants
                 .reduce((total, record) => total + parseFloat(record.amount_won || 0), 0);
 
             response.push({
                 date: startDate.format('YYYY-MM-DD'),
                 amount: totalAmount,
                 payout: totalPayout,
-                ggr: totalAmount - totalPayout - totalJackpotPayout,
-                jackpot_contribution: totalJackpotContribution,
-                jackpotPayout: totalJackpotPayout,
+                ggr: (totalAmount - totalJackpotContribution) - (totalPayout - totalJackpotPayoutClassic) - totalJackpotPayoutVariant,
+                jackpotContributionClassic: totalJackpotContribution,
+                jackpotPayoutClassic: totalJackpotPayoutClassic,
+                jacpotPayoutVariant: totalJackpotPayoutVariant
             });
 
             // Move to the next day
@@ -137,7 +156,7 @@ router.get("/ggr/dashboard", async (req, res) => {
 
         res.status(200).json(response);
     } catch (error) {
-        console.error(error);   
+        console.error(error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -154,13 +173,13 @@ router.get("/gameplay/history", async (req, res) => {
         if (dateFilter) {
             startDate = moment(dateFilter).startOf('day');
         } else {
-            startDate = moment().startOf('day'); 
+            startDate = moment().startOf('day');
         }
 
         if (dateEnd) {
             endDate = moment(dateEnd).endOf('day');
         } else {
-            endDate = moment().endOf('day'); 
+            endDate = moment().endOf('day');
         }
 
         const dateCondition = {
