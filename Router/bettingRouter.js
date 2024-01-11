@@ -147,7 +147,7 @@ router.get("/ggr/dashboard", async (req, res) => {
                 ggr: (totalAmount - totalJackpotContribution) - (totalPayout - totalJackpotPayoutClassic) - totalJackpotPayoutVariant,
                 jackpotContributionClassic: totalJackpotContribution,
                 jackpotPayoutClassic: totalJackpotPayoutClassic,
-                jacpotPayoutVariant: totalJackpotPayoutVariant
+                jackpotPayoutVariant: totalJackpotPayoutVariant
             });
 
             // Move to the next day
