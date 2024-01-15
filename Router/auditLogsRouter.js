@@ -40,6 +40,7 @@ router.get("/get/audit", async (req, res) => {
                 updatedAt: formattedUpdatedAt
             };
         });
+        
         res.status(200).json({ getAudits: formattedAudits });
 
     } catch (error) {
