@@ -19,8 +19,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const BettingRoutes = require("./Router/bettingRouter")
+const AuthenticationRoutes = require("./Router/loginRouter")
 
 app.use("/api", BettingRoutes)
+app.use("/api", AuthenticationRoutes)
 
 app.listen(port, () =>{
     console.log(`App is listen on Port ${port}`)

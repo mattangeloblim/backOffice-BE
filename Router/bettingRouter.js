@@ -109,7 +109,6 @@ router.get("/ggr/dashboard", async (req, res) => {
             })
 
             const excludedGameTypes = ['13 BALL BINGO WEB', 'BINGO PARES WEB', 'DRAGON VS TIGER BINGO WEB', 'BINGO SWERTRES WEB'];
-
             const excludedGameTypesClassic = ['FORTUNE 30 WEB', 'GOLD FARM WEB', 'GOLDEN ERA WEB', 'PIRATE BABES WEB', 'SEA RICHES WEB', 'BINGO PERYAHAN WEB'];
 
             // Filter betRecords based on excludedGameTypes
