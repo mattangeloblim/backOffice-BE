@@ -19,6 +19,10 @@ const Audit = sequelize.define("Audit", {
     action: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    type:{
+        type: DataTypes.STRING,
+        allowNull: false,
     }
 }, {
     tableName: 'audit_log',

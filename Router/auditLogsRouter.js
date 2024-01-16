@@ -4,12 +4,13 @@ const Audit = require("../models/AuditLogs")
 
 router.post("/save/audit", async (req, res) => {
     try {
-        const { user_id, username, action } = req.query
+        const { user_id, username, action, type } = req.query
 
         const saveAudit = await Audit.create({
             user_id,
             username,
-            action
+            action,
+            type
         })
 
         res.status(200).json({ saveAudit })
